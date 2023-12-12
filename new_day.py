@@ -12,12 +12,17 @@ print(f"Making directory for day {day}")
 directory = f"day{day}"
 os.makedirs(directory, exist_ok=True)
 
-def touch(fname):
-    open(os.path.join(directory, fname),"a").close()
+def touch(*parts):
+    open(os.path.join(*parts),"a").close()
 
-touch("test.txt")
-touch("main.py")
-touch("input.txt")
+touch(directory, "test.txt")
+# touch(f"day{day}.py")
+touch(directory, "input.txt")
+
+with open("./day_template.py", "r") as fh:
+    txt = fh.read().replace("DAYNUM", day)
+    with open(f"day{day}.py", "w") as fh2:
+        fh2.write(txt)
 
 print("Fetching puzzle input")
 # TODO: error handling
