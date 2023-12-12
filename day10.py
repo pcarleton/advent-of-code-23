@@ -1,7 +1,9 @@
 from util import *
 
 input = "./day10/test2.txt"
-input = "./day10/input.txt"
+# input = "./day10/input.txt"
+input = "./day10/test4.txt"
+
 
 D = open(input).readlines()
 
@@ -69,25 +71,9 @@ while cur != s_coord:
 print(f"part1: {len(locs) // 2}")
 
 from collections import deque
-edge_queue = deque()
-edge_queue.append((0+0j))
 
 pipes = set(locs)
-outside = set()
-visited = set()
 
-while len(edge_queue) > 0:
-    targ = edge_queue.popleft()
-    if targ in visited:
-        continue
-
-    visited.add(targ)
-    if targ in pipes:
-        continue
-
-    outside.add(targ)
-    neighbors = [n for n in surround(targ) if n.real >= 0 and n.imag >= 0 and n.real < len(mat[0]) and n.imag < len(mat)]
-    edge_queue.extend([n for n in neighbors if n not in visited])
 
 # print(outside, len(outside))
 
@@ -134,12 +120,18 @@ for g in gs:
     blist = []
     # print(lines)
     for pt in [(x,y) for x in range(3) for y in range(3)]:
+
         x, y = pt
         cp = lines[y][x]
         pt2 = (x-1, y-1)
+        # if c == 'L':
+        #     print(pt2, cp)
         if cp in ('A', 'B'):
             regions[c][pt2] = cp
             regions[c][complex(*pt2)] = cp
+
+# import sys             
+# sys.exit(0)
     
 flips = """FJ-
 F7-
@@ -152,7 +144,7 @@ JL^
 J--
 J|-
 L-^
-L|^"""
+L|-"""
 
 fdict = collections.defaultdict(list)
 for f in flips.split("\n"):
@@ -161,22 +153,22 @@ for f in flips.split("\n"):
         fdict[c1].append(c2)
         fdict[c2].append(c1)
     
-edge_pipe = locs[0]
-for i in range(len(locs)):
-    p = locs[i]
+# edge_pipe = locs[0]
+# for i in range(len(locs)):
+#     p = locs[i]
 
-    ns = set(surround(p))
-    reds = ns & outside
+#     ns = set(surround(p))
+#     reds = ns & outside
 
-    if len(reds) > 0:
-        edge_pipe = p
-        edge_idx = i
-        # print(reds)
-        break
+#     if len(reds) > 0:
+#         edge_pipe = p
+#         edge_idx = i
+#         # print(reds)
+#         break
 
 red_edge = 'A'
 start = 0
-edge_map = {edge_pipe: 'A'}
+edge_idx = 0
 
 def pick_side(s, cc, nc):
     if nc in fdict[cc]:
@@ -185,78 +177,169 @@ def pick_side(s, cc, nc):
         return 'A'
     return s
 
-for i in range(len(locs)):
-    idx = (edge_idx + i) % len(locs)
-    nxtidx = (idx + 1) %len(locs)
-    cur = locs[idx]
-    cur_e = edge_map[cur]
+edge_map = {}
+edge_map[locs[0]] = 'A'
+for i, loc in enumerate(locs):
+    nxtidx = (i + 1) %len(locs)
+    cur_e = edge_map[loc]
     nxt = locs[nxtidx]
-    cc = mchar(cur)
+    cc = mchar(loc)
+    if cc == 'S':
+        continue
     c = mchar(nxt)
     nxt_e = pick_side(cur_e, cc, c)
+    # print('edge', i, loc, cc, c, cur_e, nxt_e)
     edge_map[nxt] = nxt_e
 
 
-outpts = {(p.real, p.imag) for p in outside}
 
 allpts = {(x, y) for x in range(len(mat[0])) for y in range(len(mat))}
 
-cands = allpts - locpts - outpts
+# cands = allpts - locpts - outpts
 
-targ = min(cands)
-targc = complex(*targ)
+# targ = min(cands)
+# targc = complex(*targ)
 
-def in_or_out(cand, all_out, all_inside):
-    ns = set(surround(cand))
+# def in_or_out(cand, all_out, all_inside):
+#     ns = set(surround(cand))
 
-    outs = ns & all_out
-    if len(outs) > 0:
-        return False
+#     outs = ns & all_out
+#     if len(outs) > 0:
+#         return False
     
-    ins = ns & all_inside
-    if len(ins) > 0:
-        return True
+#     ins = ns & all_inside
+#     if len(ins) > 0:
+#         return True
     
-    for n in ns:
-        if n not in pipes:
-            continue
-        d = n - cand
-        edge_side = edge_map[n]
+#     for n in ns:
+#         if n not in pipes:
+#             continue
+#         d = n - cand
+#         edge_side = edge_map[n]
         
-        this_side = regions[mchar(n)].get(d)
-        if this_side is None:
-            print(n)
+#         this_side = regions[mchar(n)].get(d)
+#         if this_side is None:
+#             print(n)
 
-        if edge_side == this_side:
-            return True
-    return False
+#         if edge_side == this_side:
+#             return True
+#     return False
 
 
-print(f"neighbor: {targc + 1}, {mchar(targc+1)}, {edge_map[targc+1]}, {regions[mchar(targc+1)][complex(-1, 0)]}")
+# print(f"neighbor: {targc + 1}, {mchar(targc+1)}, {edge_map[targc+1]}, {regions[mchar(targc+1)][complex(-1, 0)]}")
 
 def mpt(cmpx):
     return (cmpx.real, cmpx.imag)
 
-candsi = set(complex(*c) for c in cands)
+# candsi = set(complex(*c) for c in cands)
 inside = set()
-for c in candsi:
-    if in_or_out(c, outside, inside):
-        inside.add(c)
+# for c in candsi:
+#     if in_or_out(c, outside, inside):
+#         inside.add(c)
 
 
-remaining = candsi - inside
-for r in remaining:
-    if in_or_out(r, outside, inside):
-        inside.add(r)
+# remaining = candsi - inside
+# for r in remaining:
+#     if in_or_out(r, outside, inside):
+#         inside.add(r)
 
+g1 = set()
+g2 = set()
+
+
+def print_annot(curp):
+    annotated = "\n".join([
+        "".join( icolorize(complex(x, y), c, [
+            (RED, {curp}),
+            (YELLOW, g1),
+            (BLUE, g2),
+            (GREEN, locs),
+            # (RED, outpts),
+            # (BLUE, cands)
+        ]) for x, c in enumerate(row)        )
+        for y, row in enumerate(mat)
+    ])
+    print(annotated)
+
+for loc in locs:
+    inout = edge_map[loc]
+    c = mchar(loc)
+    region = regions[c]
+    print(loc, c, inout, region)
+    ns = surround(loc)
+    rel = [(n, n - loc) for n in ns]
+    nonp = [(n, r, region.get(r)) for n, r in rel]
+    for n, r, ec in nonp:
+        print(n, r, ec, inout)
+        if r not in region:
+            continue
+        # Don't color pipes
+        if n in locs:
+            continue
+        if ec == inout:
+            g2.add(n)
+        else:
+            g1.add(n)
+    # print_annot(loc)
+    # print("\n\n")
+    # break
 
 inpts = [mpt(p) for p in inside]
 
 annotated = "\n".join([
-    "".join( colorize(x, y, c, [(YELLOW, inpts), (GREEN, locpts), (RED, outpts), (BLUE, cands)]) for x, c in enumerate(row)        )
+    "".join( icolorize(complex(x, y), c, [
+        (YELLOW, g1),
+        (BLUE, g2),
+        (GREEN, locs),
+        # (RED, outpts),
+        # (BLUE, cands)
+    ]) for x, c in enumerate(row)        )
     for y, row in enumerate(mat)
 ])
 
 print(annotated)
 
+
+def expand_set(p, known):
+    linked = set()
+    visited = set()
+    q = deque()
+    q.append(p)
+
+    while len(q) > 0:
+        targ = q.popleft()
+        if targ in visited:
+            continue
+
+        visited.add(targ)
+        if targ in pipes:
+            continue
+
+        linked.add(targ)
+        neighbors = [n for n in surround(targ) if n.real >= 0 and n.imag >= 0 and n.real < len(mat[0]) and n.imag < len(mat)]
+        q.extend([n for n in neighbors if n not in visited and n not in known])
+
+    return linked
+
+known = set(locs) | g1 | g2
+moreg2 = set()
+for p in g2:
+    known = set(locs) | g1 | g2
+    for l in expand_set(p, known):
+        moreg2.add(l)
+        # print_annot(l)
+
+g2 = g2 | moreg2
+
+moreg1 = set()
+for p in g1:
+    known = set(locs) | g1 | g2
+    for l in expand_set(p, known):
+        moreg1.add(l)
+
+g1 = g1 | moreg1
+
+print_annot(p)
+
+print(f"part2: {len(g1)}, {len(g2)}")
 
