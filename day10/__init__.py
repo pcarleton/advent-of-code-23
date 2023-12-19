@@ -10,3 +10,5 @@ deltas = {
     '.': [],
 }
 dc = {k: [complex(x, y) for x,y in v] for k, v in deltas.items()}
+
+
